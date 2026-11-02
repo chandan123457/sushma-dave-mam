@@ -12,12 +12,12 @@ export const profileContent = {
   institution: "Jodhpur Institute of Engineering & Technology",
   location: "Jodhpur, Rajasthan, India",
   tagline:
-    "An electrochemist working where sensing meets sustainability — building biosensors for infectious disease, engineering nanomaterials, and using light to break down the dyes that industry leaves behind.",
+    "Research in electrochemistry, biosensors and nanomaterials, with applications in infectious-disease diagnostics and the treatment of industrial dye effluents.",
   shortBio:
-    "Dr. Sushma Dave is a Professor of Chemistry at JIET Jodhpur whose work spans electrochemistry, biosensors, nanomaterials and environmental remediation. Across more than twenty-five years of teaching and research she has authored over a hundred works, including edited volumes with Springer, Wiley and Elsevier.",
+    "Dr. Sushma Dave is Professor of Chemistry in the Department of Applied Sciences at the Jodhpur Institute of Engineering & Technology, where she has taught since 1999. Her research spans electrochemistry, biosensors, nanomaterials and environmental remediation, and she has authored more than one hundred publications, including edited volumes with Springer Nature, Wiley-VCH and Elsevier.",
   bio: [
     "Dr. Sushma Dave completed her undergraduate, postgraduate and doctoral studies at Jai Narain Vyas University, Jodhpur, earning her Ph.D. in 1999. Her doctoral and early work was rooted in electroanalytical chemistry — voltammetric studies of nitroaromatics, furfural and pesticides such as endosulfan at different electrodes — a foundation that still shapes how she approaches every sensing problem.",
-    "She has taught at the Jodhpur Institute of Engineering & Technology since 1999, where she is Professor in the Department of Applied Sciences. Her teaching spans Engineering Chemistry, Environmental Chemistry, Solid Waste Management, Biology for Engineers, Food Safety and Nutrition.",
+    "At JIET her teaching spans Engineering Chemistry, Environmental Chemistry, Solid Waste Management, Biology for Engineers, Food Safety and Nutrition.",
     "Her research has since widened into point-of-care biosensors for infectious diseases, metal–organic frameworks and bio-waste-derived carbon materials for electrochemical sensing, green-synthesised nanoparticles, and the photocatalytic and microbial degradation of textile dyes. More recent work brings computational tools — artificial neural networks, cheminformatics and immunoinformatics — to drug repurposing against SARS-CoV-2 and bacterial adhesion targets.",
     "She has co-edited volumes including Point-of-Care Biosensors for Infectious Diseases (Wiley-VCH, 2023), Trends and Contemporary Technologies for Photocatalytic Degradation of Dyes (Springer, 2022) and Bio-waste-derived Carbon Materials and their Applications, especially as Sensors (Elsevier, 2025), and collaborates widely with researchers across India.",
   ].join("\n\n"),

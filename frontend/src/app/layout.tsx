@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Inter, Inter_Tight, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 
 const display = Instrument_Serif({
@@ -20,6 +20,18 @@ const code = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+// Public site typography
+const heading = Manrope({
+  variable: "--font-site-heading",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const text = Inter({
+  variable: "--font-site-text",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Dr. Sushma Dave — Electrochemistry, Biosensors & Nanomaterials",
@@ -30,12 +42,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f3efe6",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${code.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${display.variable} ${body.variable} ${code.variable} ${heading.variable} ${text.variable}`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

@@ -5,9 +5,9 @@ import { Suspense } from "react";
 import { getPublication, getPublications } from "@/lib/data";
 import { doiUrl, nf } from "@/lib/format";
 import { TYPE_LABEL, type Publication } from "@/lib/types";
-import { Authors, PublicationRow } from "@/components/site/blocks";
+import { Authors, PublicationCard, TypeBadge } from "@/components/site/blocks";
 import { Reveal } from "@/components/site/motion";
-import { Arrow } from "@/components/site/nav";
+import { ExternalArrow } from "@/components/site/nav";
 import { CopyCitation } from "@/components/site/copy-citation";
 
 export async function generateStaticParams() {
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps<"/publications/[slu
 
 export default function PublicationPage({ params }: PageProps<"/publications/[slug]">) {
   return (
-    <Suspense fallback={<div className="container-x min-h-[70vh] pt-44" />}>
+    <Suspense fallback={<div className="min-h-[70vh] pt-[72px]" />}>
       <PublicationDetail params={params} />
     </Suspense>
   );
@@ -42,12 +42,12 @@ async function PublicationDetail({ params }: { params: Promise<{ slug: string }>
   const related = all
     .filter((p) => p.id !== pub.id && p.type === pub.type)
     .sort((a, b) => Math.abs((a.year ?? 0) - (pub.year ?? 0)) - Math.abs((b.year ?? 0) - (pub.year ?? 0)) || b.citations - a.citations)
-    .slice(0, 3);
+    .slice(0, 4);
 
   const meta: [string, React.ReactNode][] = [
     ["Type", TYPE_LABEL[pub.type]],
     ["Published", pub.publishedOn ?? pub.year ?? "—"],
-    ["In", <em key="v">{pub.venue || "—"}</em>],
+    ["Source", pub.venue || "—"],
     ...(pub.publisher ? [["Publisher", pub.publisher] as [string, React.ReactNode]] : []),
     ...(pub.volume ? [["Volume", `${pub.volume}${pub.issue ? ` (${pub.issue})` : ""}`] as [string, React.ReactNode]] : []),
     ...(pub.pages ? [["Pages", pub.pages] as [string, React.ReactNode]] : []),
@@ -55,66 +55,81 @@ async function PublicationDetail({ params }: { params: Promise<{ slug: string }>
   ];
 
   return (
-    <article className="pb-24 pt-28 md:pt-40">
-      <div className="container-x">
-        <Link href="/publications" className="group label inline-flex items-center gap-2 hover:text-ink">
-          <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span> All publications
-        </Link>
+    <article>
+      <header className="border-b border-hairline bg-subtle pt-[72px]">
+        <div className="site-container py-12 md:py-16">
+          <nav className="flex items-center gap-2 text-[0.85rem] text-fg-muted" aria-label="Breadcrumb">
+            <Link href="/publications" className="font-medium hover:text-brand">
+              Publications
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate">{TYPE_LABEL[pub.type]}</span>
+          </nav>
+          <Reveal className="max-w-4xl">
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <TypeBadge type={pub.type} />
+              {pub.year && <span className="text-[0.85rem] font-medium text-fg-muted">{pub.year}</span>}
+            </div>
+            <h1 className="h-section mt-4 text-[clamp(1.8rem,3.6vw,2.75rem)] text-fg">{pub.title}</h1>
+            <Authors authors={pub.authors} className="mt-5 text-[1rem] leading-relaxed text-fg-2" />
+            {pub.venue && <p className="mt-2 text-[0.95rem] italic text-fg-muted">{pub.venue}</p>}
+          </Reveal>
+        </div>
+      </header>
 
-        <div className="mt-10 grid gap-12 md:grid-cols-12">
-          <header className="md:col-span-9">
-            <Reveal>
-              <p className="label">
-                {TYPE_LABEL[pub.type]} {pub.year && <>· {pub.year}</>}
-              </p>
-              <h1 className="mt-6 font-serif text-[clamp(2.2rem,4.8vw,4.4rem)] leading-[1.04] tracking-[-0.02em]">{pub.title}</h1>
-              <Authors authors={pub.authors} className="mt-8 max-w-3xl text-[1.02rem] leading-relaxed text-ink-2" />
-            </Reveal>
-          </header>
+      <div className="site-container grid gap-10 py-12 md:py-16 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <h2 className="h-section text-[1.35rem] text-fg">Abstract</h2>
+          {pub.abstract ? (
+            <div className="mt-5 space-y-5 text-[1.05rem] leading-[1.8] text-fg-2">
+              {pub.abstract.split(/\n{2,}/).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-5 rounded-xl border border-dashed border-hairline-strong bg-subtle p-5 text-[0.95rem] text-fg-muted">
+              The abstract for this work is not yet available here.{" "}
+              {pub.url || pub.doi ? "The full record can be read on the publisher’s website." : ""}
+            </p>
+          )}
         </div>
 
-        <div className="mt-16 grid gap-12 border-t border-line-strong pt-10 md:grid-cols-12">
-          <aside className="md:col-span-4 lg:col-span-3">
-            <dl className="divide-y divide-line border-y border-line">
-              {meta.map(([k, v]) => (
-                <div key={k} className="grid grid-cols-[96px_1fr] gap-4 py-3.5">
-                  <dt className="label pt-0.5">{k}</dt>
-                  <dd className="text-[0.9rem] text-ink">{v}</dd>
-                </div>
-              ))}
-            </dl>
-            <div className="mt-8 flex flex-col gap-3">
-              {pub.pdfUrl && <ActionLink href={pub.pdfUrl} primary>Download PDF</ActionLink>}
-              {pub.doi && <ActionLink href={doiUrl(pub.doi)}>DOI · {pub.doi}</ActionLink>}
-              {pub.url && <ActionLink href={pub.url}>View at publisher</ActionLink>}
+        <aside className="lg:col-span-4">
+          <div className="space-y-4 lg:sticky lg:top-[100px]">
+            <div className="rounded-2xl border border-hairline bg-white p-6">
+              <h2 className="font-heading text-[0.95rem] font-bold text-fg">Details</h2>
+              <dl className="mt-4 divide-y divide-hairline text-[0.9rem]">
+                {meta.map(([k, v]) => (
+                  <div key={k} className="grid grid-cols-[96px_1fr] gap-3 py-2.5">
+                    <dt className="text-fg-muted">{k}</dt>
+                    <dd className="font-medium text-fg">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <div className="flex flex-col gap-2">
+              {pub.pdfUrl && (
+                <a href={pub.pdfUrl} target="_blank" rel="noreferrer" className="flex h-12 items-center justify-center gap-2 rounded-xl bg-brand text-[0.95rem] font-semibold text-white hover:bg-brand-hover">
+                  Download PDF
+                </a>
+              )}
+              {pub.doi && <OutLink href={doiUrl(pub.doi)}>View via DOI</OutLink>}
+              {pub.url && <OutLink href={pub.url}>Publisher page</OutLink>}
               <CopyCitation text={citationText(pub)} />
             </div>
-          </aside>
-
-          <div className="md:col-span-8 lg:col-span-7 lg:col-start-5">
-            <p className="label">Abstract</p>
-            {pub.abstract ? (
-              <div className="prose-body mt-6 text-[1.12rem] leading-[1.75] text-ink-2 first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-serif first-letter:text-[4.2rem] first-letter:leading-[0.8] first-letter:text-ink">
-                {pub.abstract.split(/\n{2,}/).map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
-            ) : (
-              <p className="mt-6 text-[1.05rem] leading-relaxed text-muted">
-                An abstract has not been added for this work yet. {pub.url || pub.doi ? "The full record is available from the publisher." : ""}
-              </p>
-            )}
           </div>
-        </div>
+        </aside>
       </div>
 
       {related.length > 0 && (
-        <section className="container-x mt-28">
-          <p className="label border-t border-line-strong pt-6">More {TYPE_LABEL[pub.type].toLowerCase()}s</p>
-          <div className="mt-6 border-b border-line">
-            {related.map((p) => (
-              <PublicationRow key={p.id} pub={p} />
-            ))}
+        <section className="border-t border-hairline bg-subtle py-14 md:py-20">
+          <div className="site-container">
+            <h2 className="h-section text-[1.6rem] text-fg">More {TYPE_LABEL[pub.type].toLowerCase()}s</h2>
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              {related.map((p) => (
+                <PublicationCard key={p.id} pub={p} compact />
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -122,20 +137,16 @@ async function PublicationDetail({ params }: { params: Promise<{ slug: string }>
   );
 }
 
-function ActionLink({ href, children, primary }: { href: string; children: React.ReactNode; primary?: boolean }) {
+function OutLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={
-        primary
-          ? "group flex items-center justify-between rounded-full bg-ink px-5 py-3 text-[0.85rem] text-paper"
-          : "group flex items-center justify-between gap-3 rounded-full border border-line-strong px-5 py-3 text-[0.85rem] transition-colors hover:border-ink"
-      }
+      className="flex h-12 items-center justify-center gap-2 rounded-xl border border-hairline-strong bg-white text-[0.92rem] font-semibold text-fg hover:border-fg-faint hover:bg-subtle"
     >
-      <span className="truncate">{children}</span>
-      <Arrow className="shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      {children}
+      <ExternalArrow />
     </a>
   );
 }

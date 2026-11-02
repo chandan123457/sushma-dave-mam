@@ -12,10 +12,9 @@ export function CopyCitation({ text }: { text: string }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
       }}
-      className="flex items-center justify-between rounded-full border border-line-strong px-5 py-3 text-left text-[0.85rem] transition-colors hover:border-ink"
+      className="flex h-12 items-center justify-center gap-2 rounded-xl border border-hairline-strong bg-white text-[0.92rem] font-semibold text-fg transition-colors hover:border-fg-faint hover:bg-subtle"
     >
       {copied ? "Citation copied" : "Copy citation"}
-      <span className="font-mono text-[0.7rem] text-muted">{copied ? "✓" : "⌘C"}</span>
     </button>
   );
 }

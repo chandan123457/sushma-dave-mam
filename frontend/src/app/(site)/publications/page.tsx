@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getProfile, getPublications } from "@/lib/data";
 import { nf } from "@/lib/format";
 import { PublicationBrowser } from "@/components/site/publication-browser";
-import { Reveal, RiseText } from "@/components/site/motion";
+import { PageHeader } from "@/components/site/page-header";
 
 export const metadata: Metadata = { title: "Publications" };
 
@@ -12,22 +12,28 @@ export default async function PublicationsPage() {
   const years = pubs.map((p) => p.year).filter((y): y is number => !!y);
 
   return (
-    <div className="container-x pb-28 pt-32 md:pt-44">
-      <header className="grid gap-10 pb-16 md:grid-cols-12 md:pb-20">
-        <div className="md:col-span-8">
-          <p className="label">Bibliography · {Math.min(...years)}–{Math.max(...years)}</p>
-          <h1 className="display mt-6 text-[clamp(3.2rem,9vw,8rem)]">
-            <RiseText text="Publications" />
-          </h1>
-        </div>
-        <Reveal delay={0.3} className="flex flex-col justify-end gap-6 md:col-span-4">
-          <p className="text-[1.05rem] leading-relaxed text-ink-2">
-            Journal articles, edited books and chapters by {profile.honorific} {profile.name} and collaborators — {nf.format(total)} citations
-            across {pubs.length} works.
-          </p>
-        </Reveal>
-      </header>
-      <PublicationBrowser publications={pubs} />
-    </div>
+    <>
+      <PageHeader
+        eyebrow="Publications"
+        title="Publications"
+        description={`Journal articles, book chapters and edited volumes by ${profile.honorific} ${profile.name} and collaborators.`}
+      >
+        <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+          {[
+            [pubs.length, "Publications"],
+            [nf.format(total), "Citations"],
+            [`${Math.min(...years)}–${Math.max(...years)}`, "Years"],
+          ].map(([v, l]) => (
+            <div key={l}>
+              <dd className="num text-[1.75rem] font-extrabold text-navy">{v}</dd>
+              <dt className="text-[0.85rem] text-fg-muted">{l}</dt>
+            </div>
+          ))}
+        </dl>
+      </PageHeader>
+      <div className="site-container py-12 md:py-16">
+        <PublicationBrowser publications={pubs} />
+      </div>
+    </>
   );
 }

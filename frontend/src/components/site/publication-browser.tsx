@@ -4,7 +4,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import clsx from "clsx";
 import type { Publication, PublicationType } from "@/lib/types";
 import { TYPE_LABEL } from "@/lib/types";
-import { PublicationRow } from "./blocks";
+import { PublicationCard } from "./blocks";
 
 type Sort = "recent" | "cited";
 
@@ -32,7 +32,7 @@ export function PublicationBrowser({ publications }: { publications: Publication
       : [...list].sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || b.citations - a.citations);
   }, [publications, deferredQuery, type, sort]);
 
-  // Group by year when browsing chronologically — reads like a CV.
+  // Group by year when browsing chronologically.
   const groups = useMemo(() => {
     if (sort === "cited") return [{ key: "Most cited", items: filtered }];
     const map = new Map<string, Publication[]>();
@@ -44,34 +44,40 @@ export function PublicationBrowser({ publications }: { publications: Publication
   }, [filtered, sort]);
 
   return (
-    <div>
-      <div className="z-30 -mx-[clamp(1.25rem,4vw,3rem)] border-b border-line bg-paper/90 px-[clamp(1.25rem,4vw,3rem)] py-4 backdrop-blur-md md:sticky md:top-[72px]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <label className="relative flex-1 lg:max-w-md">
+    <div className="grid gap-10 lg:grid-cols-12">
+      <aside className="lg:col-span-3">
+        <div className="space-y-8 lg:sticky lg:top-[100px]">
+          <label className="relative block">
             <span className="sr-only">Search publications</span>
-            <svg className="absolute left-0 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-              <circle cx="7" cy="7" r="5.25" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.2" />
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-faint" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <circle cx="7" cy="7" r="5.25" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search title, author, journal or year"
-              className="w-full border-b border-line-strong bg-transparent py-2.5 pl-7 text-[0.95rem] outline-none transition-colors placeholder:text-faint focus:border-ink"
+              placeholder="Search publications"
+              className="h-11 w-full rounded-xl border border-hairline-strong bg-white pl-10 pr-3 text-[0.92rem] outline-none transition-[border-color,box-shadow] placeholder:text-fg-faint focus:border-brand focus:shadow-[0_0_0_4px_rgb(15_61_115/0.1)]"
             />
           </label>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Chip active={type === "all"} onClick={() => setType("all")}>
-              All <span className="opacity-50">{publications.length}</span>
-            </Chip>
-            {types.map(([t, n]) => (
-              <Chip key={t} active={type === t} onClick={() => setType(t)}>
-                {TYPE_LABEL[t]} <span className="opacity-50">{n}</span>
-              </Chip>
-            ))}
-            <span className="mx-2 hidden h-5 w-px bg-line-strong sm:block" />
-            <div className="flex rounded-full border border-line-strong p-0.5" role="radiogroup" aria-label="Sort">
+          <div>
+            <p className="mb-2 text-[0.8rem] font-semibold text-fg-muted">Type</p>
+            <ul className="flex flex-wrap gap-2 lg:flex-col lg:gap-1">
+              <FilterItem active={type === "all"} onClick={() => setType("all")} count={publications.length}>
+                All publications
+              </FilterItem>
+              {types.map(([t, n]) => (
+                <FilterItem key={t} active={type === t} onClick={() => setType(t)} count={n}>
+                  {TYPE_LABEL[t]}s
+                </FilterItem>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[0.8rem] font-semibold text-fg-muted">Sort by</p>
+            <div className="grid grid-cols-2 rounded-xl bg-subtle-2 p-1" role="radiogroup" aria-label="Sort">
               {(["recent", "cited"] as const).map((s) => (
                 <button
                   key={s}
@@ -79,8 +85,8 @@ export function PublicationBrowser({ publications }: { publications: Publication
                   aria-checked={sort === s}
                   onClick={() => setSort(s)}
                   className={clsx(
-                    "rounded-full px-3.5 py-1.5 text-[0.78rem] transition-colors",
-                    sort === s ? "bg-ink text-paper" : "text-ink-2 hover:text-ink",
+                    "rounded-lg py-2 text-[0.85rem] font-semibold transition-colors",
+                    sort === s ? "bg-white text-fg shadow-sm" : "text-fg-muted hover:text-fg",
                   )}
                 >
                   {s === "recent" ? "Newest" : "Most cited"}
@@ -89,51 +95,62 @@ export function PublicationBrowser({ publications }: { publications: Publication
             </div>
           </div>
         </div>
+      </aside>
+
+      <div className="lg:col-span-9">
+        <p className="text-[0.9rem] text-fg-muted">
+          Showing <span className="font-semibold text-fg">{filtered.length}</span> of {publications.length}
+        </p>
+
+        {filtered.length === 0 ? (
+          <div className="mt-6 rounded-2xl border border-dashed border-hairline-strong py-20 text-center">
+            <p className="h-section text-xl">No publications match “{query}”.</p>
+            <button
+              onClick={() => {
+                setQuery("");
+                setType("all");
+              }}
+              className="mt-3 text-sm font-semibold text-brand hover:underline"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          groups.map((g) => (
+            <section key={g.key} className="mt-8">
+              <h2 className="sticky top-[72px] z-10 -mx-1 flex items-baseline gap-3 bg-canvas/95 px-1 py-3 backdrop-blur">
+                <span className="num text-[1.5rem] font-extrabold text-fg">{g.key}</span>
+                <span className="text-[0.85rem] text-fg-muted">
+                  {g.items.length} {g.items.length === 1 ? "publication" : "publications"}
+                </span>
+              </h2>
+              <div className="mt-2 space-y-3">
+                {g.items.map((p) => (
+                  <PublicationCard key={p.id} pub={p} compact />
+                ))}
+              </div>
+            </section>
+          ))
+        )}
       </div>
-
-      <p className="label mt-8">
-        Showing {filtered.length} of {publications.length}
-      </p>
-
-      {filtered.length === 0 ? (
-        <div className="border-t border-line py-24 text-center">
-          <p className="font-serif text-3xl">Nothing matches “{query}”.</p>
-          <button onClick={() => { setQuery(""); setType("all"); }} className="mt-4 text-sm text-muted underline underline-offset-4 hover:text-ink">
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        groups.map((g) => (
-          <section key={g.key} className="mt-10 grid gap-x-8 md:grid-cols-12">
-            <h2 className="mb-4 md:col-span-2 md:mb-0">
-              <span className="sticky top-40 block font-serif text-4xl leading-none tracking-tight text-ink md:text-5xl">
-                {g.key}
-              </span>
-              <span className="label mt-2 block">{g.items.length} {g.items.length === 1 ? "item" : "items"}</span>
-            </h2>
-            <div className="border-b border-line md:col-span-10">
-              {g.items.map((p) => (
-                <PublicationRow key={p.id} pub={p} showType showYear={sort === "cited"} />
-              ))}
-            </div>
-          </section>
-        ))
-      )}
     </div>
   );
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function FilterItem({ active, onClick, count, children }: { active: boolean; onClick: () => void; count: number; children: React.ReactNode }) {
   return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className={clsx(
-        "rounded-full border px-3.5 py-1.5 text-[0.78rem] transition-colors",
-        active ? "border-ink bg-ink text-paper" : "border-line-strong text-ink-2 hover:border-ink hover:text-ink",
-      )}
-    >
-      {children}
-    </button>
+    <li>
+      <button
+        onClick={onClick}
+        aria-pressed={active}
+        className={clsx(
+          "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-[0.9rem] font-medium transition-colors",
+          active ? "bg-brand-soft text-brand" : "text-fg-2 hover:bg-subtle max-lg:border max-lg:border-hairline",
+        )}
+      >
+        {children}
+        <span className={clsx("num text-[0.8rem]", active ? "text-brand" : "text-fg-faint")}>{count}</span>
+      </button>
+    </li>
   );
 }

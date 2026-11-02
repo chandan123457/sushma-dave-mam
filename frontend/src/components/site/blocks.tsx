@@ -6,38 +6,74 @@ import { isSelf, nf, splitAuthors } from "@/lib/format";
 import { Arrow } from "./nav";
 import { Reveal } from "./motion";
 
-export function SectionHead({
-  index,
-  label,
+export function SectionHeader({
+  eyebrow,
   title,
-  aside,
-  className,
+  description,
+  action,
+  align = "left",
+  tone = "light",
 }: {
-  index: string;
-  label: string;
+  eyebrow: string;
   title: React.ReactNode;
-  aside?: React.ReactNode;
-  className?: string;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  align?: "left" | "center";
+  tone?: "light" | "dark";
 }) {
   return (
-    <div className={clsx("grid gap-6 border-t border-line-strong pt-6 md:grid-cols-12", className)}>
-      <p className="label flex gap-4 md:col-span-3">
-        <span className="text-ink">{index}</span>
-        <span>{label}</span>
-      </p>
-      <Reveal className="md:col-span-7">
-        <h2 className="display text-[clamp(2.25rem,4.6vw,4rem)]">{title}</h2>
-      </Reveal>
-      {aside && <div className="flex items-end md:col-span-2 md:justify-end">{aside}</div>}
-    </div>
+    <Reveal
+      className={clsx(
+        "flex flex-col gap-6",
+        align === "center" ? "items-center text-center" : "md:flex-row md:items-end md:justify-between",
+      )}
+    >
+      <div className={clsx("max-w-2xl", align === "center" && "mx-auto")}>
+        <p className={clsx("eyebrow", tone === "dark" && "!text-gold")}>{eyebrow}</p>
+        <h2 className={clsx("h-section mt-3 text-[clamp(1.9rem,3.4vw,2.75rem)]", tone === "dark" ? "text-white" : "text-fg")}>{title}</h2>
+        {description && (
+          <p className={clsx("mt-4 text-[1.05rem] leading-relaxed", tone === "dark" ? "text-white/65" : "text-fg-muted")}>{description}</p>
+        )}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </Reveal>
   );
 }
 
-export function TextLink({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) {
-  return (
-    <Link href={href} className={clsx("group inline-flex items-center gap-2 text-[0.9rem]", className)}>
-      <span className="link-draw pb-0.5">{children}</span>
-      <Arrow className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+export function ButtonLink({
+  href,
+  children,
+  variant = "primary",
+  className,
+  external,
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant?: "primary" | "secondary" | "ghost";
+  className?: string;
+  external?: boolean;
+}) {
+  const cls = clsx(
+    "group inline-flex items-center justify-center gap-2 text-[0.95rem] font-semibold transition-[background-color,border-color,color,box-shadow]",
+    variant !== "ghost" && "h-12 rounded-xl px-6",
+    variant === "primary" && "bg-brand text-white shadow-[0_8px_24px_-8px_rgb(15_61_115/0.55)] hover:bg-brand-hover",
+    variant === "secondary" && "border border-hairline-strong bg-white text-fg hover:border-fg-faint hover:bg-subtle",
+    variant === "ghost" && "text-brand hover:text-brand-hover",
+    className,
+  );
+  const inner = (
+    <>
+      {children}
+      <Arrow className="transition-transform duration-200 group-hover:translate-x-0.5" />
+    </>
+  );
+  return external ? (
+    <a href={href} target="_blank" rel="noreferrer" className={cls}>
+      {inner}
+    </a>
+  ) : (
+    <Link href={href} className={cls}>
+      {inner}
     </Link>
   );
 }
@@ -48,7 +84,7 @@ export function Authors({ authors, className }: { authors: string; className?: s
     <p className={className}>
       {list.map((a, i) => (
         <span key={i}>
-          <span className={isSelf(a) ? "font-medium text-ink underline decoration-accent/40 underline-offset-[3px]" : undefined}>{a}</span>
+          <span className={isSelf(a) ? "font-semibold text-fg" : undefined}>{a}</span>
           {i < list.length - 1 ? ", " : ""}
         </span>
       ))}
@@ -56,54 +92,51 @@ export function Authors({ authors, className }: { authors: string; className?: s
   );
 }
 
-export function PublicationRow({
-  pub,
-  index,
-  showType = false,
-  showYear = true,
-}: {
-  pub: Publication;
-  index?: number;
-  showType?: boolean;
-  showYear?: boolean;
-}) {
-  const gutter = index !== undefined || showYear;
+export function TypeBadge({ type }: { type: Publication["type"] }) {
+  return (
+    <span className="inline-flex items-center rounded-md bg-brand-soft px-2 py-0.5 text-[0.72rem] font-semibold text-brand">
+      {TYPE_LABEL[type]}
+    </span>
+  );
+}
+
+export function PublicationCard({ pub, compact = false }: { pub: Publication; compact?: boolean }) {
   return (
     <Link
       href={`/publications/${pub.slug}`}
       className={clsx(
-        "group grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 border-t border-line py-6 transition-colors md:py-7",
-        gutter ? "md:grid-cols-[72px_1fr_120px]" : "md:grid-cols-[1fr_120px]",
+        "group flex h-full gap-5 rounded-2xl border border-hairline bg-white transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-brand-tint hover:shadow-[0_12px_32px_-12px_rgb(10_23_48/0.18)]",
+        compact ? "p-5" : "p-6 md:p-7",
       )}
     >
-      {gutter && (
-        <span className="label hidden pt-1.5 md:block">
-          {index !== undefined ? String(index + 1).padStart(2, "0") : pub.year ?? "—"}
-        </span>
-      )}
-      <div className="min-w-0">
-        <h3 className="font-serif text-[1.35rem] leading-[1.2] tracking-[-0.01em] text-ink transition-colors group-hover:text-accent md:text-[1.55rem]">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <TypeBadge type={pub.type} />
+          {pub.year && <span className="text-[0.8rem] font-medium text-fg-muted">{pub.year}</span>}
+        </div>
+        <h3
+          className={clsx(
+            "mt-3 font-heading font-bold leading-snug tracking-[-0.015em] text-fg transition-colors group-hover:text-brand",
+            compact ? "text-[1.02rem]" : "text-[1.15rem] md:text-[1.2rem]",
+          )}
+        >
           {pub.title}
         </h3>
-        <Authors authors={pub.authors} className="mt-2 text-[0.85rem] leading-relaxed text-muted" />
-        <p className="mt-1 text-[0.85rem] italic leading-relaxed text-ink-2">
-          {pub.venue}
-          {pub.year && <span className="not-italic text-muted"> · {pub.year}</span>}
-        </p>
-        {showType && <p className="label mt-3">{TYPE_LABEL[pub.type]}</p>}
+        <Authors authors={pub.authors} className="mt-2 line-clamp-2 text-[0.875rem] leading-relaxed text-fg-muted" />
+        {pub.venue && <p className="mt-1 line-clamp-1 text-[0.875rem] italic text-fg-2">{pub.venue}</p>}
       </div>
-      <div className="flex flex-col items-end justify-between gap-3 text-right">
-        <p className="font-mono text-[0.8rem] text-ink-2">
-          {pub.citations > 0 ? (
-            <>
-              <span className="text-[1.05rem] text-ink">{nf.format(pub.citations)}</span>
-              <span className="ml-1.5 text-muted">cit.</span>
-            </>
-          ) : (
-            <span className="text-faint">—</span>
-          )}
-        </p>
-        <Arrow className="text-muted opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent group-hover:opacity-100" />
+      <div className="flex shrink-0 flex-col items-end justify-between">
+        {pub.citations > 0 ? (
+          <div className="text-right">
+            <p className="num text-[1.35rem] font-bold leading-none text-fg">{nf.format(pub.citations)}</p>
+            <p className="mt-1 text-[0.72rem] text-fg-muted">citations</p>
+          </div>
+        ) : (
+          <span />
+        )}
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-subtle text-fg-muted transition-colors group-hover:bg-brand group-hover:text-white">
+          <Arrow />
+        </span>
       </div>
     </Link>
   );
@@ -117,44 +150,42 @@ export function CitationChart({ data, className }: { data: { year: number; count
   const step = [1, 2, 5, 10].map((m) => m * mag).find((s) => s >= raw)!;
   const max = Math.ceil(peak / step) * step;
   const ticks = Array.from({ length: max / step + 1 }, (_, i) => i * step);
+  const latest = data.at(-1)?.year;
+
   return (
-    <figure className={className}>
-      <div className="relative">
-        <div className="pointer-events-none absolute inset-0 flex flex-col-reverse justify-between">
-          {ticks.map((t, i) => (
-            <div key={i} className="relative border-t border-dashed border-line">
-              <span className="absolute -top-2.5 right-full mr-3 font-mono text-[0.65rem] text-faint">{t}</span>
-            </div>
+    <figure className={clsx("flex gap-3", className)}>
+      <div className="flex h-[240px] flex-col-reverse justify-between pb-6 text-right md:h-[280px]">
+        {ticks.map((t) => (
+          <span key={t} className="num -mb-2 text-[0.7rem] text-fg-faint">
+            {t}
+          </span>
+        ))}
+      </div>
+      <div className="relative flex-1">
+        <div className="pointer-events-none absolute inset-x-0 top-0 flex h-[calc(100%-24px)] flex-col-reverse justify-between">
+          {ticks.map((t) => (
+            <div key={t} className="border-t border-hairline" />
           ))}
         </div>
-        <div className="relative ml-0 flex h-[260px] items-end gap-[3px] sm:gap-2 md:h-[300px]">
-          {data.map((d, i) => (
-            <div key={d.year} className="group relative flex h-full flex-1 items-end">
-              <Reveal y={0} delay={i * 0.04} className="relative h-full w-full origin-bottom">
-                <div
-                  className="absolute bottom-0 w-full bg-ink/85 transition-colors duration-300 group-hover:bg-accent"
-                  style={{ height: `${(d.count / max) * 100}%` }}
-                />
-              </Reveal>
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-sm bg-ink px-2 py-1 font-mono text-[0.7rem] text-paper opacity-0 transition-opacity group-hover:opacity-100">
-                {d.count}
+        <div className="relative flex h-[240px] items-end gap-1 pb-6 md:h-[280px] md:gap-2">
+          {data.map((d) => (
+            <div key={d.year} className="group relative flex h-full flex-1 flex-col justify-end">
+              <div
+                className={clsx(
+                  "w-full rounded-t-[4px] transition-colors duration-200",
+                  d.year === latest ? "bg-gold/80 group-hover:bg-gold" : "bg-brand/85 group-hover:bg-brand",
+                )}
+                style={{ height: `${(d.count / max) * 100}%` }}
+              />
+              <span className="pointer-events-none absolute -top-9 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-navy px-2 py-1 text-[0.72rem] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                {d.year}: {d.count}
+              </span>
+              <span className={clsx("num absolute left-1/2 top-full mt-1.5 -translate-x-1/2 text-[0.68rem] text-fg-muted", d.year % 2 === 1 && "max-sm:hidden")}>
+                {String(d.year).slice(2)}
               </span>
             </div>
           ))}
         </div>
-      </div>
-      <div className="mt-3 flex gap-[3px] sm:gap-2">
-        {data.map((d, i) => (
-          <span
-            key={d.year}
-            className={clsx(
-              "flex-1 text-center font-mono text-[0.6rem] text-muted sm:text-[0.65rem]",
-              i % 2 === 1 && "max-sm:invisible",
-            )}
-          >
-            ’{String(d.year).slice(2)}
-          </span>
-        ))}
       </div>
     </figure>
   );

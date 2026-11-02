@@ -5,10 +5,10 @@ import { getProfile } from "@/lib/data";
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const profile = await getProfile();
   return (
-    <>
-      <Nav scholarUrl={profile.scholarUrl} />
-      <main className="grain">{children}</main>
+    <div className="site min-h-dvh">
+      <Nav name={`${profile.honorific} ${profile.name}`} designation={profile.designation} scholarUrl={profile.scholarUrl} />
+      <main>{children}</main>
       <Footer profile={profile} />
-    </>
+    </div>
   );
 }

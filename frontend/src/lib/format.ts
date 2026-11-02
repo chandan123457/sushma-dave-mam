@@ -8,7 +8,7 @@ export function splitAuthors(authors: string): string[] {
     .filter(Boolean);
 }
 
-const SELF = /^(s\.?\s*dave|sushma\s+dave|d\s+sushma|dave\s+s|dr\.?\s*sushma\s+dave)$/i;
+const SELF = /^(s\.?\s*dave|sushma\s+dave|d\s+sushma|dave\s+(s|sushma)|dr\.?\s*sushma\s+dave)$/i;
 export const isSelf = (name: string) => SELF.test(name.replace(/\s+/g, " ").trim());
 
 export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }) {
