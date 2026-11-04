@@ -27,6 +27,7 @@ export const profileContent = {
   scholarUrl: "https://scholar.google.com/citations?user=ZYqkgAoAAAAJ&hl=en",
   institutionUrl: "https://www.jietjodhpur.ac.in/mentor/dr-sushma-dave",
   education: [
+    { degree: "LL.B.", institution: "", year: "2018" },
     { degree: "Ph.D.", institution: "Jai Narain Vyas University, Jodhpur", year: "1999" },
     { degree: "Post-graduation", institution: "Jai Narain Vyas University, Jodhpur", year: "1993" },
     { degree: "Graduation", institution: "Jai Narain Vyas University, Jodhpur", year: "1991" },

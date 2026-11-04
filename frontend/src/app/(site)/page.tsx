@@ -91,7 +91,10 @@ export default async function HomePage() {
 
           <Reveal delay={0.1} className="lg:col-span-5">
             <div className="relative mx-auto max-w-[420px]">
-              <div className="absolute -right-4 -top-4 h-full w-full rounded-[28px] bg-navy" aria-hidden />
+              <div
+                className="absolute -right-4 -top-4 h-full w-full rounded-[28px] border border-gold/40 bg-[radial-gradient(rgb(176_138_62/0.28)_1.2px,transparent_1.4px),linear-gradient(135deg,#f6efe0,#ead9b6)] [background-size:14px_14px,100%_100%]"
+                aria-hidden
+              />
               <div className="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-subtle-2 ring-1 ring-hairline">
                 {profile.photoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -161,12 +164,12 @@ export default async function HomePage() {
               <p className="text-[1.15rem] leading-[1.75] text-fg-2">{profile.shortBio}</p>
             </Reveal>
             <Reveal delay={0.05}>
-              <ol className="mt-8 grid gap-3 sm:grid-cols-3">
+              <ol className="mt-8 grid gap-3 sm:grid-cols-2">
                 {profile.education.map((e) => (
                   <li key={e.degree} className="rounded-xl border border-hairline bg-white p-4">
                     <p className="num text-[0.85rem] font-bold text-brand">{e.year}</p>
                     <p className="mt-1.5 font-heading text-[0.98rem] font-bold text-fg">{e.degree}</p>
-                    <p className="mt-0.5 text-[0.82rem] leading-snug text-fg-muted">{e.institution}</p>
+                    {e.institution && <p className="mt-0.5 text-[0.82rem] leading-snug text-fg-muted">{e.institution}</p>}
                   </li>
                 ))}
               </ol>

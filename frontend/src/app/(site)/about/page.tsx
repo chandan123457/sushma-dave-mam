@@ -101,7 +101,7 @@ export default async function AboutPage() {
                   <span className="absolute -left-[29.5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-brand ring-1 ring-brand" />
                   <p className="num text-[0.85rem] font-bold text-brand">{e.year}</p>
                   <p className="mt-0.5 font-heading text-[1.05rem] font-bold text-fg">{e.degree}</p>
-                  <p className="text-[0.92rem] text-fg-muted">{e.institution}</p>
+                  {e.institution && <p className="text-[0.92rem] text-fg-muted">{e.institution}</p>}
                 </li>
               ))}
             </ol>
